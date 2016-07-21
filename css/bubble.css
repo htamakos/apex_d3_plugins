@@ -1,0 +1,50 @@
+.a-D3BubbleChart .a-D3BubbleChart-axis line,
+.a-D3BubbleChart .a-D3BubbleChart-axis path {
+  fill: none;
+  stroke: #dddddd;
+}
+.a-D3BubbleChart .a-D3BubbleChart-axis .tick text {
+  fill: #707070;
+}
+.a-D3BubbleChart .a-D3BubbleChart-axis-title {
+  fill: #404040;
+  font-size: 1.1em;
+}
+.a-D3BubbleChart .a-D3BubbleChart-line--fade,
+.a-D3BubbleChart .a-D3BubbleChart-area--fade {
+  opacity: 0.1;
+}
+.a-D3BubbleChart .a-D3BubbleChart-axisLineX,
+.a-D3BubbleChart .a-D3BubbleChart-axisLineY {
+  stroke-width: 2px;
+  stroke: #000000;
+}
+.a-D3BubbleChart .a-D3BubbleChart-tooltip {
+  position: absolute;
+}
+.a-D3BubbleChart .a-D3BubbleChart-container {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.a-D3BubbleChart .u-Processing {
+  display: block;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+.a-D3BubbleChart .a-D3ChartLegend,
+.a-D3BubbleChart .a-D3ChartLegend-layout,
+.a-D3BubbleChart .a-D3ChartLegend-item {
+  border-top: none !important;
+  border-right: none !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  background-color: transparent;
+}
+.a-D3BubbleChart-pointContainer-dot {
+  cursor: pointer;
+}
+.a-D3BubbleChart-pointContainer--fade {
+  opacity: 0.1;
+}

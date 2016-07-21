@@ -1,0 +1,43 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="js/vendor/jquery-2.1.3.min.js"></script>
+    <script src="js/vendor/desktop.min.js"></script>
+    <script src="js/vendor/d3.min.js"></script>
+    <script src="js/vendor/d3.oracle.js"></script>
+    <script src="js/vendor/d3.oracle.tooltip.js"></script>
+    <script src="js/vendor/oracle.jql.js"></script>
+    <script src="js/vendor/d3.oracle.ary.js"></script>
+    <script src="js/sample_bubble.js"></script>
+    <link rel="stylesheet" href="https://129.144.1.82/i/app_ui/css/Theme-Standard.min.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="https://129.144.1.82/i/app_ui/css/Core.min.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="https://129.144.1.82/i/libraries/jquery-ui/1.10.4/themes/base/jquery-ui.min.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="https://129.144.1.82/i/plugins/com.oracle.apex.d3.linechart/1.0/d3.oracle.linechart.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="https://129.144.1.82/i/plugins/com.oracle.apex.d3.tooltip/d3.oracle.tooltip.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="https://129.144.1.82/i/plugins/com.oracle.apex.d3.ary/d3.oracle.ary.css?v=5.0.0.00.31" type="text/css">
+    <link rel="stylesheet" href="css/bubble.css" type="text/css">
+    <style>
+    .axis text {
+      font-family: sans-serif;
+      font-size: 11px;
+    }
+    </style>
+  </head>
+  <body>
+    <div id = "d3_bubble_region_region" class="a-D3BubbleChart">
+      <div id="d3_bubble_chart_region_chart" class="a-D3BubbleChart-container">
+      </div>
+    </div>
+    <script type="text/javascript">
+      (function(){
+        com_oracle_apex_d3_bubblechart(
+          "d3_bubble_region","d3_bubble_region",
+          {
+            chartRegionId: "d3_bubble_chart_region"
+          }
+        )
+      })();
+    </script>
+  <body>
+</html>
