@@ -35,6 +35,7 @@
       console.log(dataset);
 
   		// x軸のスケール設定
+      console.log(d3.extent(dataset,  function(d){ return d.x; }))
   		var xScale = d3.scale.linear()
   						       .domain(d3.extent(dataset,  function(d){ return d.x; }))
   						       .range([padding, width - padding])
@@ -116,9 +117,9 @@
 				.call(bubleChart.yAxis);
 
       //凡例の描画
-      gLegend$ = $(document.createElement('div'));
-      gChart$.after(gLegend$);
-      _initializeLegend(dataset, width);
+      //gLegend$ = $(document.createElement('div'));
+      //gChart$.after(gLegend$);
+      //_initializeLegend(dataset, );
 
     }
 
@@ -170,7 +171,6 @@
 
       gRegion$.on("apexrefresh", _refresh)
               .trigger("apexrefresh");
-
     }
 
     function _initializeTooltip(){
@@ -215,31 +215,6 @@
     }
 
     function _initializeLegend(data, width){
-      gAry = d3.oracle.ary()
-               .hideTitle(true)
-               .showValue(false)
-               .leftColor(true)
-               .numberOfColumns(Math.max(Math.floor(width / LEGEND_COLUMN_WIDTH), 1 ))
-               .accessors({
-                 color: function(d, i) { return color(i); },
-                 label: function(d) { return d.x; }
-               })
-               .symbol('circle');
-      d3.select(gLegend$.get(0))
-        .datum(data)
-        .call(gAry)
-        .selectAll('a-D3ChartLegend-item')
-        .each(function (d, i){
-            d3.select( this )
-              .selectAll( '.a-D3ChartLegend-item-color' )
-              .each(function() {
-                  var self = d3.select(this);
-                  var colorClass = self.attr('class').match(/u-Color-\d+-BG--bg/g) || [];
-                  for (var i = colorClass.length - 1; i >= 0; i--) {
-                      self.classed(colorClass[i], false);
-                  };
-              })
-        });
     }
 
     function _handlePointEnterEvent(object){
