@@ -175,12 +175,7 @@
 
     function _initializeTooltip(){
       function getTooltipLabel(d) {
-        return "x: "
-               + d.x
-               + ", y: "
-               + d.y
-               + ", r: "
-               + d.r;
+        return d.label;
       }
 
       function getTooltipValue(d){
