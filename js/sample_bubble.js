@@ -1,7 +1,7 @@
 (function( util, server, $, d3 ) {
   var sampleData = [];
-  var width = 1122, height = 500, padding = 100
-      LEGEND_COLUMN_WIDTH = 200;
+  var width = 1122, height = 700, padding = 100
+      LEGEND_COLUMN_WIDTH = 300;
 
   com_oracle_apex_d3_bubblechart = function(pRegionId, pAjaxId, pOptions){
     var gIsKeyDownTriggered,
@@ -23,12 +23,16 @@
       var dataset = [];
 
       if(isDevelopmentMode){
-        for(i=0; i<20; i++){
-    			var _x = Math.floor(Math.random() * 100);
-    			var _y = Math.floor(Math.random() * 100);
-    			var _r = Math.floor(Math.random() * 100);
-    			dataset.push({ x:_x, y:_y, r:_r });
-    		}
+        //for(i=0; i<20; i++){
+    		//	var _x = Math.floor(Math.random() * 100);
+    		//	var _y = Math.floor(Math.random() * 100);
+    		//	var _r = Math.floor(Math.random() * 100);
+    		//	dataset.push({ x:_x, y:_y, r:_r });
+    		//}
+        dataset = jsonData.data;
+        dataset = dataset.filter(function(d){
+          return d.x > 300000 && d.x < 5000000;
+        });
       } else {
   		  dataset = jsonData.data;
       }
@@ -46,7 +50,7 @@
   		// 円のスケール設定
   		var rScale = d3.scale.sqrt()
   						       .domain(d3.extent(dataset, function(d){ return d.r; }))
-  						       .range([1, 100])
+  						       .range([10, 100])
 
 			var xAxis = d3.svg.axis()
 							      .scale(xScale)
@@ -113,7 +117,7 @@
 
 			svg.append("g")
 				.attr("class", "a-D3BubbleChart-axis")
-				.attr("transform", "translate(" + padding + ",0)")
+				.attr("transform", "translate(" + padding + ", 0)")
 				.call(bubleChart.yAxis);
 
       //凡例の描画
@@ -126,7 +130,7 @@
     // dataの取得
     function _refresh() {
       if(isDevelopmentMode) {
-        _draw(sampleData);
+        _draw(document.sampleJSON);
       } else {
         apex.server.plugin(pAjaxId, { pageItems: null },
                                     { success: _draw, dataType: "json" });
@@ -175,7 +179,7 @@
 
     function _initializeTooltip(){
       function getTooltipLabel(d) {
-        return d.label;
+        return d.label + " x: " + Math.floor(d.x) + " y: " + Math.floor(d.y) + " r: " + Math.floor(d.r);
       }
 
       function getTooltipValue(d){
