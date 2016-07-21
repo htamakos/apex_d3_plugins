@@ -1,6 +1,6 @@
 (function( util, server, $, d3 ) {
   var sampleData = [];
-  var width = 1122, height = 500, padding = 100
+  var width = 1122, height = 500, padding = 200
       LEGEND_COLUMN_WIDTH = 200;
 
   com_oracle_apex_d3_bubblechart = function(pRegionId, pAjaxId, pOptions){
