@@ -1,6 +1,6 @@
 (function( util, server, $, d3 ) {
   var sampleData = [];
-  var width = 960, height = 500, padding = 50, isDevelopmentMode = false,
+  var width = 960, height = 500, padding = 50
       LEGEND_COLUMN_WIDTH = 200;
 
   com_oracle_apex_d3_bubblechart = function(pRegionId, pAjaxId, pOptions){
@@ -15,6 +15,7 @@
         svg;
 
     var color = d3.scale.category20();
+    var isDevelopmentMode = pOptions.isDevelopmentMode ? true : false
 
     // グラフの描画
     function _draw(jsonData){
@@ -35,26 +36,26 @@
 
   		// x軸のスケール設定
   		var xScale = d3.scale.linear()
-  						.domain(d3.extent(dataset,  function(d){ return d.x; }))
-  						.range([padding, width - padding])
+  						       .domain(d3.extent(dataset,  function(d){ return d.x; }))
+  						       .range([padding, width - padding])
   		// y軸のスケール設定
   		var yScale = d3.scale.linear()
-  						.domain(d3.extent(dataset, function(d){ return d.y; }))
-  						.range([height - padding, padding])
+  						       .domain(d3.extent(dataset, function(d){ return d.y; }))
+  						       .range([height - padding, padding])
   		// 円のスケール設定
-  		var rScale = d3.scale.linear()
-  						.domain(d3.extent(dataset, function(d){ return d.r; }))
-  						.range([1, 100])
+  		var rScale = d3.scale.sqrt()
+  						       .domain(d3.extent(dataset, function(d){ return d.r; }))
+  						       .range([1, 100])
 
 			var xAxis = d3.svg.axis()
-							  .scale(xScale)
-							  .orient("bottom")
-							  .ticks(5);
+							      .scale(xScale)
+							      .orient("bottom")
+							      .ticks(5);
 
 			var yAxis = d3.svg.axis()
-							  .scale(yScale)
-							  .orient("left")
-							  .ticks(5);
+							      .scale(yScale)
+							      .orient("left")
+							      .ticks(5);
       bubleChart = {
         color: color,
         xScale: xScale,
@@ -89,6 +90,7 @@
   				   r: 0
            }
          )
+         .style('opacity', 0.5)
          .on("mouseover", function(d){
             _handleMouseOverEvent(this, d)
           })
@@ -113,10 +115,10 @@
 				.attr("transform", "translate(" + padding + ",0)")
 				.call(bubleChart.yAxis);
 
-      // 凡例の描画
-      //gLegend$ = $(document.createElement('div'));
-      //gChart$.after(gLegend$);
-      //_initializeLegend(dataset, width);
+      //凡例の描画
+      gLegend$ = $(document.createElement('div'));
+      gChart$.after(gLegend$);
+      _initializeLegend(dataset, width);
 
     }
 
