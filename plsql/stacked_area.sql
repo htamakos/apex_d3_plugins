@@ -37,9 +37,9 @@ is
 
     c_x_column     constant varchar2(255) := p_region.attribute_01;
     c_y_column     constant varchar2(255) := p_region.attribute_02;
-    c_label_column constant varchar2(255) := p_region.attribute_04;
+    c_label_column constant varchar2(255) := p_region.attribute_03;
 
-    c_x_data_type  constant varchar2(200)  := p_region.attribute_05;
+    c_x_data_type  constant varchar2(200)  := p_region.attribute_04;
 
     l_x_column_no     pls_integer;
     l_y_column_no     pls_integer;
@@ -70,46 +70,53 @@ begin
     -- l_column_value_listというリスト（配列の配列のイメージ）におけるカラムのインデックスを
     -- 必要なカラムごとに求める
     if c_x_data_type = 'NUMBER' then
-      l_x_column_no := apex_plugin_util.get_column_no(
-          p_attribute_label   => 'x column',
-          p_column_alias      => c_x_column,
-          p_column_value_list => l_column_value_list,
-          p_is_required       => true,
-          p_data_type         => apex_plugin_util.c_data_type_varchar2
-      );
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            p_data_type         => apex_plugin_util.c_data_type_varchar2
+        );
     elsif c_x_data_type = 'TIMESTAMP' then
-      l_x_column_no := apex_plugin_util.get_column_no(
-          p_attribute_label   => 'x column',
-          p_column_alias      => c_x_column,
-          p_column_value_list => l_column_value_list,
-          p_is_required       => true,
-          p_data_type         => apex_plugin_util.c_data_type_timestamp
-      );
-
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            p_data_type         => apex_plugin_util.c_data_type_timestamp
+        );
     elsif c_x_data_type = 'TIMESTAMP_TZ' then
-      l_x_column_no := apex_plugin_util.get_column_no(
-          p_attribute_label   => 'x column',
-          p_column_alias      => c_x_column,
-          p_column_value_list => l_column_value_list,
-          p_is_required       => true,
-          p_data_type         => apex_plugin_util.c_data_type_timestamp_tz
-      );
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            p_data_type         => apex_plugin_util.c_data_type_timestamp_tz
+        );
     elsif c_x_data_type = 'TIMESTAMP_LTZ' then
-      l_x_column_no := apex_plugin_util.get_column_no(
-          p_attribute_label   => 'x column',
-          p_column_alias      => c_x_column,
-          p_column_value_list => l_column_value_list,
-          p_is_required       => true,
-          p_data_type         => apex_plugin_util.c_data_type_timestamp_ltz
-      );
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            p_data_type         => apex_plugin_util.c_data_type_timestamp_ltz
+        );
+    elsif c_x_data_type = 'DATE' then
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            p_data_type         => apex_plugin_util.c_data_type_date
+        );
     else
-      l_x_column_no := apex_plugin_util.get_column_no(
-          p_attribute_label   => 'x column',
-          p_column_alias      => c_x_column,
-          p_column_value_list => l_column_value_list,
-          p_is_required       => true,
-          p_data_type         => apex_plugin_util.c_data_type_date
-      );
+        l_x_column_no := apex_plugin_util.get_column_no(
+            p_attribute_label   => 'x column',
+            p_column_alias      => c_x_column,
+            p_column_value_list => l_column_value_list,
+            p_is_required       => true,
+            P_data_type         => apex_plugin_util.c_data_type_varchar2
+        );
     end if;
 
     l_y_column_no := apex_plugin_util.get_column_no(
@@ -128,11 +135,16 @@ begin
         p_data_type         => apex_plugin_util.c_data_type_varchar2
     );
 
+    sys.dbms_output.enable;
+    sys.dbms_output.put_line('l_x_column_no' || to_char(l_x_column_no));
+    sys.dbms_output.put_line('l_y_column_no' || to_char(l_y_column_no));
+    sys.dbms_output.put_line('l_label_column_no' || to_char(l_label_column_no)); 
+    apex_debug.log_dbms_output;
+
     -- data: []という配列の作成開始
     apex_json.open_array('data');
     for l_row_num in 1 .. l_column_value_list(1).value_list.count loop
         begin
-            l_x := l_column_value_list(l_x_column_no).value_list(l_row_num).number_value;
             if c_x_data_type = 'NUMBER' then
                 l_x := l_column_value_list(l_x_column_no).value_list(l_row_num).number_value;
             elsif c_x_data_type = 'TIMESTAMP' then
@@ -141,8 +153,13 @@ begin
                 l_x_date := to_char(l_column_value_list(l_x_column_no).value_list(l_row_num).timestamp_tz_value, 'DY MON DD YYY HH24:MI:SS TZH:TZM');
             elsif c_x_data_type = 'TIMESTAMP_LTZ' then
                 l_x_date := to_char(l_column_value_list(l_x_column_no).value_list(l_row_num).timestamp_tz_value, 'DY MON DD YYY HH24:MI:SS');
-            else
+            elsif c_x_data_type = 'DATE' then
                 l_x_date := to_char(l_column_value_list(l_x_column_no).value_list(l_row_num).date_value, 'DY MON DD YYY HH24:MI:SS');
+            else
+                l_x_date := apex_plugin_util.get_value_as_varchar2(
+                    p_data_type => l_column_value_list(l_label_column_no).data_type,
+                    p_value     => l_column_value_list(l_label_column_no).value_list(l_row_num)
+                );
             end if;
 
             l_y := l_column_value_list(l_y_column_no).value_list(l_row_num).number_value;
@@ -157,7 +174,6 @@ begin
             else
               apex_json.write('x', l_x_date);
             end if;
-            apex_json.write('x', l_x);
             apex_json.write('y', l_y);
             apex_json.close_object;
 

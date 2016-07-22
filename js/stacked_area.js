@@ -21,68 +21,63 @@
     }
 
     function _draw(jsonData, options){
+      var data = jsonData.data;
       var dataset = [];
+      var dates = $.unique(data.map(function(d){ return d.x; }))
+      var labels = $.unique(data.map(function(d){ return d.label; }))
 
-      if(pOptions.isDevelopmentMode){
-        var sampleLabels = [
-          'mario', 'tama', 'dbcpu', 'enq: tx row contention'
-        ]
-        sampleLabels.forEach(function(val, index){
-          for(var i=0;i < 20;i++){
-            var obj = {
-              x: new Date(2015,1,i),
-              y: Math.floor(Math.random() * 100),
-              label: sampleLabels[index]
-            }
-            dataset.push(obj);
+      labels.forEach(function(label,i){
+        var values = [];
+        var dateForLabel = data.filter(function(d){ return d.label === label; });
+
+        dates.forEach(function(date,i){
+          var d = dateForLabel.find(function(d){ return d.x === date });
+          if(d){
+            d.x = new Date(d.x);
+            values.push(d);
+          } else {
+            values.push({ label: label, x: new Date(date), y: 0 });
           }
-        });
-      }else{
-        dataset = jsonData.data;
-      }
+        })
 
-      var groupingDataset = d3.nest().key(function(d){ return d.label; })
-                              .entries(dataset);
-      var testDataset = groupingDataset[1].values;
+        var obj = { key: label, values: values};
+        dataset.push(obj);
+      });
 
       var xScale = d3.time.scale()
-                     .domain(d3.extent(dataset, function(d){
-                       return d.x;
+                     .domain(d3.extent(dates, function(d){
+                       return new Date(d);
                      }))
                      .range([padding, width - padding]);
-
+                     
       var yScale = d3.scale.linear()
                      .range([height - padding, padding]);
       var colorScale = d3.scale.category10();
 
       var xAxis = d3.svg.axis()
                     .scale(xScale)
-                    .orient("buttom");
+                    .orient("buttom")
+                    .ticks(5);
       var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
                     .ticks(5);
 
-      var area = d3.svg.area()
-                   .x(function(d){ return xScale(d.x); })
-                   .y0(function(d){ return yScale(d.y0); })
-                   .y1(function(d){ return yScale(d.y0 + d.y); })
       var stack = d3.layout.stack()
                     .values(function(d){ return d.values });
 
       var layer = svg.selectAll(".layer")
-                     .data(stack(groupingDataset))
+                     .data(stack(dataset))
                      .enter()
                      .append("g")
                      .attr("class", ".layer");
-
-      yScale.domain([0, d3.max(groupingDataset[groupingDataset.length - 1].values, function(d){
+      yScale.domain([0, d3.max(dataset[dataset.length - 1].values, function(d){
         return d.y0 + d.y;
       })]);
 
       var area = d3.svg.area()
-                   .x(function(d) { return xScale(d.x); })
-                   .y0(function(d) { return yScale(d.y0) })
+                   .x(function(d) { debugger; return xScale(d.x); })
+                   .y0(function(d) { return yScale(d.y0); })
                    .y1(function(d) { return yScale(d.y0 + d.y); });
 
       layer.append("path")
