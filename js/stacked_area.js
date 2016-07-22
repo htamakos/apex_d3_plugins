@@ -51,7 +51,6 @@
                      .range([padding, width - padding]);
 
       var yScale = d3.scale.linear()
-                     .domain(d3.extend())
                      .range([height - padding, padding]);
       var colorScale = d3.scale.category10();
 
