@@ -49,8 +49,9 @@
                        return new Date(d);
                      }))
                      .range([padding, width - padding]);
-                     
+
       var yScale = d3.scale.linear()
+                     .domain(d3.extend())
                      .range([height - padding, padding]);
       var colorScale = d3.scale.category10();
 
@@ -76,7 +77,7 @@
       })]);
 
       var area = d3.svg.area()
-                   .x(function(d) { debugger; return xScale(d.x); })
+                   .x(function(d) { return xScale(d.x); })
                    .y0(function(d) { return yScale(d.y0); })
                    .y1(function(d) { return yScale(d.y0 + d.y); });
 
