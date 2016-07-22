@@ -52,14 +52,12 @@
                      .range([padding, width - padding]);
 
       var yScale = d3.scale.linear()
-                     .domain(d3.extent(dataset, function(d){ return d.y }))
                      .range([height - padding, padding]);
       var colorScale = d3.scale.category10();
 
       var xAxis = d3.svg.axis()
                     .scale(xScale)
-                    .orient("buttom")
-                    .ticks(5);
+                    .orient("buttom");
       var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
@@ -77,10 +75,15 @@
                      .enter()
                      .append("g")
                      .attr("class", ".layer");
+
+      yScale.domain([0, d3.max(groupingDataset[groupingDataset.length - 1].values, function(d){
+        return d.y0 + d.y;
+      })]);
+
       var area = d3.svg.area()
                    .x(function(d) { return xScale(d.x); })
-                   .y0(function(d) { return height - padding })
-                   .y1(function(d) { return yScale(d.y); });
+                   .y0(function(d) { return yScale(d.y0) })
+                   .y1(function(d) { return yScale(d.y0 + d.y); });
 
       layer.append("path")
            .attr("class", "area")
