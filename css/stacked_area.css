@@ -1,0 +1,50 @@
+.a-D3StackedArea .a-D3StackedArea-axis line,
+.a-D3StackedArea .a-D3StackedArea-axis path {
+  fill: none;
+  stroke: #dddddd;
+}
+.a-D3StackedArea .a-D3StackedArea-axis .tick text {
+  fill: #707070;
+}
+.a-D3StackedArea text{
+  fill: #707070;
+  font-size: 0.9em;
+}
+.a-D3StackedArea .a-D3StackedArea-line--fade,
+.a-D3StackedArea .a-D3StackedArea-area--fade {
+  opacity: 0.1;
+}
+.a-D3StackedArea .a-D3StackedArea-axisLineX,
+.a-D3StackedArea .a-D3StackedArea-axisLineY {
+  stroke-width: 2px;
+  stroke: #000000;
+}
+.a-D3StackedArea .a-D3StackedArea-tooltip {
+  position: absolute;
+}
+.a-D3StackedArea .a-D3StackedArea-container {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.a-D3StackedArea .u-Processing {
+  display: block;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+.a-D3StackedArea .a-D3ChartLegend,
+.a-D3StackedArea .a-D3ChartLegend-layout,
+.a-D3StackedArea .a-D3ChartLegend-item {
+  border-top: none !important;
+  border-right: none !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  background-color: transparent;
+}
+.a-D3StackedArea-pointContainer-dot {
+  cursor: pointer;
+}
+.a-D3StackedArea-pointContainer--fade {
+  opacity: 0.1;
+}
