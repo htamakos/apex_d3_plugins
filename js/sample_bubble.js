@@ -1,7 +1,7 @@
 (function( util, server, $, d3 ) {
   var sampleData = [];
-  var width = 1122, height = 700, padding = 100
-      LEGEND_COLUMN_WIDTH = 300;
+  var width = 1122, height = 700, padding = 100,
+  LEGEND_COLUMN_WIDTH = 300;
 
   com_oracle_apex_d3_bubblechart = function(pRegionId, pAjaxId, pOptions){
     var gIsKeyDownTriggered,
@@ -9,10 +9,10 @@
         gYValueFormatter,
         gTooltipGenerator,
         gTooltip$,
-        gLegend$,
         gChart$,
         bubleChart,
-        svg;
+        svg,
+        gLegend$;
 
     var color = d3.scale.category20();
     var isDevelopmentMode = pOptions.isDevelopmentMode ? true : false
@@ -36,10 +36,8 @@
       } else {
   		  dataset = jsonData.data;
       }
-      console.log(dataset);
 
   		// x軸のスケール設定
-      console.log(d3.extent(dataset,  function(d){ return d.x; }))
   		var xScale = d3.scale.linear()
   						       .domain(d3.extent(dataset,  function(d){ return d.x; }))
   						       .range([padding, width - padding])
@@ -91,13 +89,14 @@
            {
   			 	   cx: function(d){ return bubleChart.xScale(d.x); },
   				   cy: function(d){ return bubleChart.yScale(d.y); },
-  				   fill: function(d,i){return color(i);},
-  				   r: 0
+  				   fill: function(d,i){return color(d.x);},
+  				   r: 0,
+             label: function(d){ return d.label; }
            }
          )
          .style('opacity', 0.5)
          .on("mouseover", function(d){
-            _handleMouseOverEvent(this, d)
+            _handleMouseOverEvent(this, d, bubleChart)
           })
           .on("mouseout", function(d){
             _hideTooltip(this, d);
@@ -120,11 +119,30 @@
 				.attr("transform", "translate(" + padding + ", 0)")
 				.call(bubleChart.yAxis);
 
-      //凡例の描画
-      //gLegend$ = $(document.createElement('div'));
-      //gChart$.after(gLegend$);
-      //_initializeLegend(dataset, );
+      _showLegend(dataset, bubleChart)
 
+      svg.append("g")
+         .attr("class", "a-D3BubbleChart-axis a-D3BubbleChart-axis-title")
+         .append("text")
+         .attr(
+           {
+             x: padding / 3,
+             y: height / 2,
+             "text-anchor": "middle"
+           }
+         )
+         .text(pOptions.yAxisTitle)
+
+      svg.append("g")
+         .attr("class", "a-D3BubbleChart-axis a-D3BubbleChart-axis-title")
+         .append("text")
+         .attr(
+          {
+            x: width / 2,
+            y: height - padding / 2,
+          }
+         )
+         .text(pOptions.xAxisTitle);
     }
 
     // dataの取得
@@ -137,11 +155,30 @@
       }
     }
 
-    function _showTooltip(object, d){
+    function _showTooltip(object, d, accessors){
       gTooltipColor = object.getAttribute("fill");
-      d3.select(gTooltip$.get(0))
-        .datum(d)
-        .call(gTooltipGenerator);
+      var tooltipSelection = d3.select(gTooltip$.get(0));
+
+      tooltipSelection.append("div")
+                      .attr("class", "a-D3ChartTooptip-marker")
+                      .style({
+                        'background-color': accessors.color(d.x)
+                      });
+      tooltipSelection.append("p")
+                      .attr("class", "a-D3ChartTooptip-marker")
+                      .text(d.label);
+
+      tooltipSelection.append("p")
+                      .attr("class", "a-D3ChartTooptip-content")
+                      .text("x: " +  Math.floor(d.x));
+
+      tooltipSelection.append("p")
+                      .attr("class", "a-D3ChartTooptip-content")
+                      .text("y: " +  Math.floor(d.y));
+
+      tooltipSelection.append("p")
+                      .attr("class", "a-D3ChartTooptip-content")
+                      .text("S: " +  Math.floor(d.x));
 
       if ( !gTooltip$.is(':visible') ) {
         gTooltip$.fadeIn();
@@ -158,6 +195,7 @@
 
     function _hideTooltip(){
       gTooltip$.stop().fadeOut(0);
+      gTooltip$.children().remove();
     }
 
     function _init(pRegionId, pOptions){
@@ -171,6 +209,7 @@
               .attr("height", height)
               .attr("class", "a-D3BubbleChart-svg")
 
+      _initializeLegend();
       _initializeTooltip();
 
       gRegion$.on("apexrefresh", _refresh)
@@ -178,42 +217,59 @@
     }
 
     function _initializeTooltip(){
-      function getTooltipLabel(d) {
-        return d.label + " x: " + Math.floor(d.x) + " y: " + Math.floor(d.y) + " r: " + Math.floor(d.r);
-      }
-
-      function getTooltipValue(d){
-        return d.label;
-      }
-
-      function getTooltipColor(d){
-        return gTooltipColor;
-      }
-
-      function getTooltipContent(d){
-        return d.tooltip;
-      }
-
-      var accessorOptions = {
-        label: getTooltipLabel,
-        value: getTooltipValue,
-        color: getTooltipColor,
-        content: getTooltipContent
-      }
-
-      gTooltipGenerator = d3.oracle.tooltip()
-                            .accessors(accessorOptions)
-                            .formatters({ value : gYValueFormatter })
-                            .transitions({ enable : false })
-                            .symbol('circle');
       gTooltip$ = $('<div>').addClass('a-D3BubbleChart-tooltip a-D3Tooltip')
                             .appendTo(gChart$)
                             .hide();
-
-      var tooltipSelection = d3.select(gTooltip$.get(0));
     }
 
-    function _initializeLegend(data, width){
+    function _initializeLegend(){
+      var svgOffset = gChart$.select("svg").offset();
+      gLegend = d3.select(gChart$.get(0))
+                  .append('ul')
+                  .attr("class", "a-D3ChartLegend-component")
+                  .style({
+                    "-moz-column-count": 1,
+                    "-webkit-column-count": 1,
+                    "-moz-column-width": "8em",
+                    "-webkit-column-count": "8em",
+                    position: 'absolute',
+                    top: svgOffset.top + padding,
+                    left: svgOffset.left + width - padding - 30,
+                    width: 150,
+                    height: height - padding * 2
+                  });
+    }
+
+    function _showLegend(data, accessors){
+      var targetDataset = data.sort(function(a,b){
+        var ar = a.r, br = b.r;
+        if(ar > br) return -1;
+        if(ar < br) return 1;
+        return 0
+      }).slice(0,19);
+      gLegend.selectAll("li")
+             .data(targetDataset)
+             .sort(function(d){ return d.r })
+             .enter()
+             .append("li")
+             .on("mouseout", function(d){
+                $("circle[label=\"" + d.label + "\"]").css("opacity", 0.5);
+                $(this).removeClass("a-D3ChartLegend-selected");
+             })
+             .on("mouseover", function(d){
+               $("circle[label='" + d.label + "']").css("opacity", 1);
+               $(this).attr("class", "a-D3ChartLegend-selected");
+             })
+             .each(function(d,i){
+                d3.select(this).append("div")
+                  .attr("class", "a-D3ChartLegend-marker")
+                  .style({
+                    'background-color': accessors.color(d.x)
+                  });
+                d3.select(this).append("div")
+                   .attr("class", "a-D3ChartLegend-marker")
+                   .text(d.label);
+             })
     }
 
     function _handlePointEnterEvent(object){
@@ -221,8 +277,8 @@
       gHoveredPoint = object;
     }
 
-    function _handleMouseOverEvent(object, d){
-      _showTooltip(object, d);
+    function _handleMouseOverEvent(object, d, accessors){
+      _showTooltip(object, d, accessors);
     }
 
     _init(pRegionId, pOptions);

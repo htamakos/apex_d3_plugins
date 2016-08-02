@@ -9,7 +9,7 @@
     <script src="js/vendor/d3.oracle.tooltip.js"></script>
     <script src="js/vendor/oracle.jql.js"></script>
     <script src="js/vendor/d3.oracle.ary.js"></script>
-    <script src="js/sample_data.js"></script>
+    <script src="js/vendor/sample_data.js"></script>
     <script src="js/sample_bubble.js"></script>
     <link rel="stylesheet" href="css/vendor/Theme-Standard.min.css" type="text/css">
     <link rel="stylesheet" href="css/vendor/Core.min.css" type="text/css">
@@ -35,7 +35,9 @@
           "d3_bubble_region","d3_bubble_region",
           {
             chartRegionId: "d3_bubble_chart_region",
-            isDevelopmentMode: true
+            isDevelopmentMode: true,
+            xAxisTitle: "実行回数",
+            yAxisTitle: "reads"
           }
         )
       })();

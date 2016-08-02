@@ -138,7 +138,7 @@ begin
     sys.dbms_output.enable;
     sys.dbms_output.put_line('l_x_column_no' || to_char(l_x_column_no));
     sys.dbms_output.put_line('l_y_column_no' || to_char(l_y_column_no));
-    sys.dbms_output.put_line('l_label_column_no' || to_char(l_label_column_no)); 
+    sys.dbms_output.put_line('l_label_column_no' || to_char(l_label_column_no));
     apex_debug.log_dbms_output;
 
     -- data: []という配列の作成開始
@@ -157,8 +157,8 @@ begin
                 l_x_date := to_char(l_column_value_list(l_x_column_no).value_list(l_row_num).date_value, 'DY MON DD YYY HH24:MI:SS');
             else
                 l_x_date := apex_plugin_util.get_value_as_varchar2(
-                    p_data_type => l_column_value_list(l_label_column_no).data_type,
-                    p_value     => l_column_value_list(l_label_column_no).value_list(l_row_num)
+                    p_data_type => l_column_value_list(l_x_column_no).data_type,
+                    p_value     => l_column_value_list(l_x_column_no).value_list(l_row_num)
                 );
             end if;
 

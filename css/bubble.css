@@ -7,7 +7,7 @@
   fill: #707070;
 }
 .a-D3BubbleChart .a-D3BubbleChart-axis-title {
-  fill: #404040;
+  fill: #707070;
   font-size: 1.1em;
 }
 .a-D3BubbleChart .a-D3BubbleChart-line--fade,
@@ -33,15 +33,33 @@
   top: 20px;
   right: 20px;
 }
-.a-D3BubbleChart .a-D3ChartLegend,
-.a-D3BubbleChart .a-D3ChartLegend-layout,
-.a-D3BubbleChart .a-D3ChartLegend-item {
-  border-top: none !important;
-  border-right: none !important;
-  border-left: none !important;
-  border-bottom: none !important;
-  background-color: transparent;
+.a-D3ChartLegend-component {
+  list-style-type: none;
 }
+
+.a-D3ChartLegend-marker, .a-D3ChartTooptip-marker {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 100%;
+  margin-top: 0.5em;
+  margin-left: 0.5em;
+  vertical-align: top;
+  color: #707070;
+}
+
+.a-D3ChartTooptip-content {
+  color: #707070;
+  margin-top: -5px;
+  margin-left: 20px;
+}
+.a-D3ChartLegend-selected {
+  background-color: rgba(255, 255, 255, 0.95);
+  -webkit-box-shadow: 0px 1px 15px 0px rgba(50, 50, 50, 0.6);
+  -moz-box-shadow: 0px 1px 15px 0px rgba(50, 50, 50, 0.6);
+  box-shadow: 0px 1px 15px 0px rgba(50, 50, 50, 0.6);
+}
+
 .a-D3BubbleChart-pointContainer-dot {
   cursor: pointer;
 }

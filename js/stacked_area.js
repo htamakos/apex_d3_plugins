@@ -23,8 +23,9 @@
     function _draw(jsonData, options){
       var data = jsonData.data;
       var dataset = [];
-      var dates = $.unique(data.map(function(d){ return d.x; }))
-      var labels = $.unique(data.map(function(d){ return d.label; }))
+      var dates = $.unique(data.map(function(d){ return d.x; }));
+      var labels = $.unique(data.map(function(d){ return d.label; }));
+      var timeFormat = d3.time.format('%Y-%m-%d %H:%M');
 
       labels.forEach(function(label,i){
         var values = [];
@@ -33,10 +34,10 @@
         dates.forEach(function(date,i){
           var d = dateForLabel.find(function(d){ return d.x === date });
           if(d){
-            d.x = new Date(d.x);
+            d.x = timeFormat.parse(d.x);
             values.push(d);
           } else {
-            values.push({ label: label, x: new Date(date), y: 0 });
+            values.push({ label: label, x: timeFormat.parse(date), y: 0 });
           }
         })
 
@@ -46,7 +47,7 @@
 
       var xScale = d3.time.scale()
                      .domain(d3.extent(dates, function(d){
-                       return new Date(d);
+                       return timeFormat.parse(d);
                      }))
                      .range([padding, width - padding]);
 
@@ -57,7 +58,7 @@
       var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("buttom")
-                    .ticks(5);
+                    .tickFormat(timeFormat);
       var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
