@@ -3,7 +3,9 @@
       LEGEND_COLUMN_WIDTH = 300;
 
   com_oracle_apex_d3_stacked_area = function(pRegionId, pAjaxId, pOptions){
-    var gYValueFormatter;
+    var gYValueFormatter,
+        gTooltip$,
+        gLegend;
 
     function _init(){
       gRegion$ = $('#' + util.escapeCSS(pRegionId) + '_region', apex.gPageContext$);
@@ -14,17 +16,20 @@
               .attr("width", width)
               .attr("height", height)
               .attr("class", "a-D3StackedArea-svg");
+      _initializeLegend();
+      _initializeTooltip();
 
       gRegion$.on("apexrefresh", _refresh)
               .trigger("apexrefresh");
-      _initializeTooltip();
     }
 
     function _draw(jsonData, options){
       var data = jsonData.data;
       var dataset = [];
-      var dates = $.unique(data.map(function(d){ return d.x; }));
-      var labels = $.unique(data.map(function(d){ return d.label; }));
+      var dates = data.map(function(d){ return d.x; })
+                      .filter(function(x,i,self){ return self.indexOf(x) === i; });
+      var labels = data.map(function(d){ return d.label; })
+                       .filter(function(x,i,self){ return self.indexOf(x) === i; });
       var timeFormat = d3.time.format('%Y-%m-%d %H:%M');
 
       labels.forEach(function(label,i){
@@ -53,7 +58,7 @@
 
       var yScale = d3.scale.linear()
                      .range([height - padding, padding]);
-      var colorScale = d3.scale.category10();
+      var colorScale = d3.scale.category20();
 
       var xAxis = d3.svg.axis()
                     .scale(xScale)
@@ -90,10 +95,19 @@
            .attr("d", function(d){
              return area(d.values);
            })
+           .attr("key", function(d){
+             return d.key
+           })
            .on("mouseover", function(d){
               _handleMouseOverEvent(this, d)
             })
            .on("mouseout", function(d){
+             d3.selectAll("path[key=\"" + d.key + "\"]")
+               .style({
+                 "stroke": "",
+                 "stroke-width": "",
+                 "opacity": 0.5
+               })
              _hideTooltip(this, d);
            })
 
@@ -114,6 +128,7 @@
            {
              x: 10,
              y: height / 2,
+             transform: "rotate(-90,20,"+ height/2 + ")"
            }
          )
          .text(pOptions.yAxisTitle)
@@ -128,43 +143,65 @@
           }
          )
          .text(pOptions.xAxisTitle);
+      _showLegend(dataset, colorScale)
     }
     function _initializeTooltip(){
-      function getTooltipLabel(d) {
-        return d.key;
-      }
-
-      function getTooltipValue(d){
-        return d.key;
-      }
-
-      function getTooltipColor(d){
-        return gTooltipColor;
-      }
-
-      function getTooltipContent(d){
-        return d.tooltip;
-      }
-
-      var accessorOptions = {
-        label: getTooltipLabel,
-        value: getTooltipValue,
-        color: getTooltipColor,
-        content: getTooltipContent
-      }
-
-      gTooltipGenerator = d3.oracle.tooltip()
-                            .accessors(accessorOptions)
-                            .formatters({ value : gYValueFormatter })
-                            .transitions({ enable : false })
-                            .symbol('circle');
-      gTooltip$ = $('<div>').addClass('a-D3StackedAreaChart-tooltip a-D3Tooltip')
+      gTooltip$ = $('<div>').addClass('a-D3StackedArea-tooltip a-D3Tooltip')
                             .appendTo(gChart$)
                             .hide();
-
-      var tooltipSelection = d3.select(gTooltip$.get(0));
     }
 
+   function _initializeLegend(){
+     var svgOffset = gChart$.select(".a-D3StackedArea-svg").offset();
+     gLegend = d3.select(gChart$.get(0))
+                 .append('ul')
+                 .attr("class", "a-D3StackedAreaLegend-component")
+                 .style({
+                   "margin-top": padding + "px",
+                   "margin-left": "-5%",
+                   height: (height - padding * 2) + "px",
+                   width: "500px"
+                 });
+   }
+
+   function _showLegend(data, colorScale){
+     if(data.length >= 20) {
+       var targetDataset = data.slice(0,19);
+     } else {
+       var targetDataset = data.slice(0,data.length-1);
+     }
+     gLegend.selectAll("li")
+            .data(targetDataset)
+            .sort(function(d){ return d.r })
+            .enter()
+            .append("li")
+            .on("mouseout", function(d){
+              d3.selectAll("path[key=\"" + d.key + "\"]")
+                .style({
+                  "stroke": "",
+                  "stroke-width": "",
+                  "opacity": 0.5
+                })
+            })
+            .on("mouseover", function(d){
+              d3.selectAll("path[key=\"" + d.key + "\"]")
+                .style({
+                  "stroke": "black",
+                  "stroke-width": 0.5,
+                  "opacity": 1
+                })
+            })
+            .each(function(d,i){
+               d3.select(this).append("div")
+                 .attr("class", "a-D3StackedAreaLegend-marker")
+                 .style({
+                   'background-color': colorScale(i)
+                 });
+               d3.select(this).append("div")
+                  .attr("class", "a-D3StackedAreaLegend-label")
+                  .text(d.key);
+            })
+   }
 
     function _refresh() {
       if(pOptions.isDevelopmentMode) {
@@ -177,9 +214,16 @@
 
     function _showTooltip(object, d){
       gTooltipColor = object.getAttribute("fill");
-      d3.select(gTooltip$.get(0))
-        .datum(d)
-        .call(gTooltipGenerator);
+      var tooltipSelection = d3.select(gTooltip$.get(0));
+
+      tooltipSelection.append("div")
+                      .attr("class", "a-D3StackedAreaTooptip-marker")
+                      .style({
+                        'background-color': gTooltipColor
+                      });
+      tooltipSelection.append("div")
+                      .attr("class", "a-D3StackedAreaTooptip-label")
+                      .text(d.key);
 
       if ( !gTooltip$.is(':visible') ) {
         gTooltip$.fadeIn();
@@ -196,6 +240,7 @@
 
     function _hideTooltip(){
       gTooltip$.stop().fadeOut(0);
+      gTooltip$.children().remove();
     }
 
 
@@ -205,6 +250,12 @@
     }
 
     function _handleMouseOverEvent(object, d){
+      d3.selectAll("path[key=\"" + d.key + "\"]")
+        .style({
+          "stroke": "black",
+          "stroke-width": "0.5",
+          "opacity": 1
+        })
       _showTooltip(object, d);
     }
 

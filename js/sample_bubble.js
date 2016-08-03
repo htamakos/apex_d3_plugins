@@ -12,31 +12,51 @@
         gChart$,
         bubleChart,
         svg,
-        gLegend$;
+        gLegend$,
+        xTooltipName,
+        yTooltipName,
+        rTooltipName;
 
-    var color = d3.scale.category20();
+    function d3_rgbNumber(value) {
+      return new d3.rgb(value >> 16, value >> 8 & 0xff, value & 0xff);
+    }
+
+    function d3_rgbString(value) {
+      return d3_rgbNumber(value) + "";
+    }
+
+    var d3_categoryCustom20 = [
+      0xff0000, 0xff4000,
+      0xff8000, 0xffbf00,
+      0xffff00, 0xbfff00,
+      0x80ff00, 0x40ff00,
+      0x00ff00, 0x00ff40,
+      0x00ff80, 0x00ffbf,
+      0x00ffff, 0x00bfff,
+      0x0080ff, 0x0040ff,
+      0x0000ff, 0x4000ff,
+      0x8000ff, 0xbf00ff
+    ].map(d3_rgbString);
+
+    d3.scale.d3_categoryCustom20 = function() {
+      return d3.scale.ordinal().range(d3_categoryCustom20);
+    };
+
+    var color = d3.scale.d3_categoryCustom20();
     var isDevelopmentMode = pOptions.isDevelopmentMode ? true : false
 
     // グラフの描画
     function _draw(jsonData){
-      console.log(jsonData);
       var dataset = [];
 
       if(isDevelopmentMode){
-        //for(i=0; i<20; i++){
-    		//	var _x = Math.floor(Math.random() * 100);
-    		//	var _y = Math.floor(Math.random() * 100);
-    		//	var _r = Math.floor(Math.random() * 100);
-    		//	dataset.push({ x:_x, y:_y, r:_r });
-    		//}
-        dataset = jsonData.data;
-        dataset = dataset.filter(function(d){
+        dataset = jsonData.data.filter(function(d){
           return d.x > 300000 && d.x < 5000000;
         });
       } else {
-  		  dataset = jsonData.data;
+  		  dataset = jsonData.data.sort(function(a,b){ return b.r - a.r; });
       }
-
+      dataset = jsonData.data.sort(function(a,b){ return b.r - a.r; });
   		// x軸のスケール設定
   		var xScale = d3.scale.linear()
   						       .domain(d3.extent(dataset,  function(d){ return d.x; }))
@@ -89,17 +109,24 @@
            {
   			 	   cx: function(d){ return bubleChart.xScale(d.x); },
   				   cy: function(d){ return bubleChart.yScale(d.y); },
-  				   fill: function(d,i){return color(d.x);},
+  				   fill: function(d,i){return bubleChart.color(i);},
   				   r: 0,
-             label: function(d){ return d.label; }
+             label: function(d){ return d.label; },
+             class: "a-D3BubbleChart-circle"
            }
          )
          .style('opacity', 0.5)
          .on("mouseover", function(d){
-            _handleMouseOverEvent(this, d, bubleChart)
+            _handleMouseOverEvent(this, d, bubleChart);
           })
           .on("mouseout", function(d){
-            _hideTooltip(this, d);
+            _handleMouseOutEvent(this, d, bubleChart);
+          })
+          .on("click", function(d){
+            if(d.link){
+              var win = apex.navigation.redirect(d.link);
+              win.focus();
+            }
           })
   			 .transition()
   			 .duration(1000)
@@ -124,14 +151,14 @@
       svg.append("g")
          .attr("class", "a-D3BubbleChart-axis a-D3BubbleChart-axis-title")
          .append("text")
+         .text(pOptions.yAxisTitle)
          .attr(
            {
-             x: padding / 3,
-             y: height / 2,
-             "text-anchor": "middle"
+             x: 5,
+             y: height/2,
+             transform: "rotate(-90,10," + height/2 + ")"
            }
          )
-         .text(pOptions.yAxisTitle)
 
       svg.append("g")
          .attr("class", "a-D3BubbleChart-axis a-D3BubbleChart-axis-title")
@@ -162,7 +189,7 @@
       tooltipSelection.append("div")
                       .attr("class", "a-D3ChartTooptip-marker")
                       .style({
-                        'background-color': accessors.color(d.x)
+                        'background-color': gTooltipColor
                       });
       tooltipSelection.append("p")
                       .attr("class", "a-D3ChartTooptip-marker")
@@ -170,15 +197,15 @@
 
       tooltipSelection.append("p")
                       .attr("class", "a-D3ChartTooptip-content")
-                      .text("x: " +  Math.floor(d.x));
+                      .text(xTooltipName + ": " +  Math.floor(d.x));
 
       tooltipSelection.append("p")
                       .attr("class", "a-D3ChartTooptip-content")
-                      .text("y: " +  Math.floor(d.y));
+                      .text(yTooltipName + ": " +  Math.floor(d.y));
 
       tooltipSelection.append("p")
                       .attr("class", "a-D3ChartTooptip-content")
-                      .text("S: " +  Math.floor(d.x));
+                      .text(rTooltipName + ": " +  Math.floor(d.r));
 
       if ( !gTooltip$.is(':visible') ) {
         gTooltip$.fadeIn();
@@ -199,9 +226,11 @@
     }
 
     function _init(pRegionId, pOptions){
-      console.log(util.escapeCSS(pRegionId));
       gRegion$ = $('#' + util.escapeCSS(pRegionId) + '_region', apex.gPageContext$);
       gChart$ = $('#' + util.escapeCSS(pOptions.chartRegionId) + '_chart', apex.gPageContext$);
+      xTooltipName = pOptions.xTooltipName ? pOptions.xTooltipName : "x";
+      yTooltipName = pOptions.yTooltipName ? pOptions.yTooltipName : "y";
+      rTooltipName = pOptions.rTooltipName ? pOptions.rTooltipName : "S";
 
       svg = d3.select(gChart$.get(0))
               .append("svg")
@@ -223,48 +252,47 @@
     }
 
     function _initializeLegend(){
-      var svgOffset = gChart$.select("svg").offset();
+      var svgOffset = gChart$.select(".a-D3BubbleChart-svg").offset();
       gLegend = d3.select(gChart$.get(0))
                   .append('ul')
                   .attr("class", "a-D3ChartLegend-component")
                   .style({
-                    "-moz-column-count": 1,
-                    "-webkit-column-count": 1,
+                    "-moz-column-count": "1",
                     "-moz-column-width": "8em",
-                    "-webkit-column-count": "8em",
-                    position: 'absolute',
-                    top: svgOffset.top + padding,
-                    left: svgOffset.left + width - padding - 30,
-                    width: 150,
-                    height: height - padding * 2
+                    "-webkit-columns": "1 8em",
+                    "margin-top": padding + "px",
+                    "margin-left": "-5%",
+                    height: (height - padding * 2) + "px"
                   });
     }
 
     function _showLegend(data, accessors){
-      var targetDataset = data.sort(function(a,b){
-        var ar = a.r, br = b.r;
-        if(ar > br) return -1;
-        if(ar < br) return 1;
-        return 0
-      }).slice(0,19);
+      if(data.length >= 20) {
+        var targetDataset = data.slice(0,19);
+      } else {
+        var targetDataset = data.slice(0,data.length-1);
+      }
       gLegend.selectAll("li")
              .data(targetDataset)
-             .sort(function(d){ return d.r })
              .enter()
              .append("li")
              .on("mouseout", function(d){
                 $("circle[label=\"" + d.label + "\"]").css("opacity", 0.5);
-                $(this).removeClass("a-D3ChartLegend-selected");
              })
              .on("mouseover", function(d){
                $("circle[label='" + d.label + "']").css("opacity", 1);
-               $(this).attr("class", "a-D3ChartLegend-selected");
+             })
+             .on("click", function(d){
+               if(d.link){
+                 var win = apex.navigation.redirect(d.link);
+                 win.focus();
+               }
              })
              .each(function(d,i){
                 d3.select(this).append("div")
                   .attr("class", "a-D3ChartLegend-marker")
                   .style({
-                    'background-color': accessors.color(d.x)
+                    'background-color': accessors.color(i)
                   });
                 d3.select(this).append("div")
                    .attr("class", "a-D3ChartLegend-marker")
@@ -278,7 +306,13 @@
     }
 
     function _handleMouseOverEvent(object, d, accessors){
+      d3.select(object).style("opacity", 1);
       _showTooltip(object, d, accessors);
+    }
+
+    function _handleMouseOutEvent(object, d, accessors){
+      d3.select(object).style("opacity", 0.5);
+      _hideTooltip(object, d, accessors);
     }
 
     _init(pRegionId, pOptions);

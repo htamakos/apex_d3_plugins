@@ -23,6 +23,7 @@
   position: absolute;
 }
 .a-D3StackedArea .a-D3StackedArea-container {
+  display: inline-flex;
   position: relative;
   margin-top: 1em;
   margin-bottom: 1em;
@@ -47,4 +48,41 @@
 }
 .a-D3StackedArea-pointContainer--fade {
   opacity: 0.1;
+}
+
+.a-D3StackedAreaLegend-component {
+  list-style-type: none;
+}
+
+.a-D3StackedAreaLegend-marker, .a-D3StackedAreaTooptip-marker {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 100%;
+  margin-top: 0.5em;
+  margin-left: 0.5em;
+  color: #707070;
+}
+
+.a-D3StackedAreaTooptip-marker {
+  margin-bottom: 0.5em;
+}
+
+.a-D3StackedAreaLegend-label {
+  display: inline-block;
+  margin-top: 0.5em;
+  margin-left: 0.5em;
+}
+
+.a-D3StackedAreaTooptip-label {
+  display: inline-block;
+  margin-top: 0.2em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  vertical-align: top;
+}
+
+.a-D3StackedAreaTooptip-content {
+  margin-top:  3px;
+  margin-left: 20px;
 }
